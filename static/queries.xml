@@ -1,0 +1,56 @@
+<queries>
+	<model name="artist" shorturl="/musicdb/artist/{0}">
+		<open name="get">
+			SELECT * FROM artist ORDER BY name
+		</open>
+		
+		<open name="get_by_id" params="artist_id">
+			SELECT * FROM artist
+			WHERE artistid = {0}
+		</open>
+		
+		<open name="get_with_group_members" params="artist_id">
+			SELECT a.* 
+			FROM artist a
+			WHERE a.artistid = {0}
+			UNION DISTINCT
+			SELECT a1.artistid, a2.* FROM artist a1
+			JOIN artist_group ag ON a1.artistid=ag.groupid
+			JOIN artist a2 ON ag.memberid=a2.artistid
+			WHERE a1.artistid = {0}
+			UNION DISTINCT
+			SELECT a1.artistid, a2.* FROM artist a1
+			JOIN artist_group ag ON a1.artistid=ag.memberid
+			JOIN artist a2 ON ag.groupid=a2.artistid
+			WHERE a1.artistid = {0}
+		</open>
+		
+		<exec name="add" params="name,alias_id">
+			INSERT INTO artist (name, aliasid)
+			VALUES ({0}, {1})
+		</exec>
+		
+		<exec name="update" params="artist_id,name,alias_id">
+			UPDATE artist
+			SET name = {1}, aliasid = {2}
+			WHERE artistid = {0}
+		</exec>
+		
+		<exec name="delete" params="artist_id">
+			DELETE FROM artist
+			WHERE artistid = {0}
+		</exec>
+	</model>
+	
+	<model name="artist_group">
+		<exec name="delete_by_member_id" params="member_id">
+			DELETE FROM artist_group
+			WHERE member_id = {0}
+		</exec>
+		
+		<exec name="add" params="group_id,member_id">
+			INSERT INTO artist_group (groupid, memberid)
+			VALUES ({0}, {1})
+		</exec>
+	</model>
+</queries>

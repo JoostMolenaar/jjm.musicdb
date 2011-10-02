@@ -1,0 +1,19 @@
+* { margin: 0; padding: 0; }
+body { margin: 0px 5px 0px 5px; }
+a { text-decoration: none; }
+a:visited { color: blue; }
+a:hover { color: red; }
+body { font-family: helvetica; }
+dl { margin-top: 1em; }
+dt { font-weight: bold; display: block; width: 5em; float: left; }
+dd { display: block; margin-left: 5em; }
+.page li { list-style-type: none; }
+.page li { border: 2px outset #aaaaaa; margin: 2px 0px; padding: 5px; }
+.page { display: none; }
+.page li { display: block; min-height: 35px; }
+.collapsed { display: none; }
+#status { 
+	background: red; color: white; font-weight: bold; 
+	position: fixed; left: -5px; bottom: 0px; 
+	padding: 2px 5px; 
+	display: none; }

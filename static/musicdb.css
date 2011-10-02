@@ -1,0 +1,57 @@
+* { margin: 0px; padding: 0px; }
+
+html { height: 100%; overflow: hidden; font-size: .8em; }
+body { height: 100%; overflow: hidden; }
+
+#Forms   { position: absolute; right: 0px; top: 0px; bottom: 0px; width: 79.9%; }
+#Main    { position: absolute; right: 0px; top: 0px; bottom: 0px; width: 79.9%; }
+#Menu    { position: absolute; left:  0px; top: 0px; bottom: 0px; width: 20%; }
+#Main    { display: block; }
+
+#Main { overflow: auto; }
+
+#Menu h1 { height: 1em; }
+#Menu h1:hover { cursor: pointer; color: blue; text-decoration: underline; }
+
+body { font-family: verdana, tahoma, sans-serif; }
+
+#Menu ul { list-style-type: none; }
+#Menu li { display: block; }
+#Menu a { display: block; }
+#Menu a.small { display: inline; float: right; position: relative; bottom: 1.4em; font-size: .8em; height: 1em; }
+#Menu h1 { }
+
+#Main table a.small { float: right; }
+#Main table { border-collapse: collapse; width: 100%; }
+#Main table th { text-align: left; }
+#Main table th:hover { }
+#Main table td { vertical-align: top; font-size: .8em; }
+
+#Forms form { width: 45em; }
+#Forms form label { display: inline-block; width: 10em; vertical-align: top; }
+#Forms form input { width: 29.7em; }
+#Forms form select { width: 30em; }
+#Forms form button { display: inline-block; width: 10em; }
+#Forms form { line-height: 2em; }
+#Forms ul { list-style-type: none; }
+#Forms { display: none; }
+#Forms input:focus { border: solid 1px blue; outline: 0px; }
+#Forms select:focus { border: solid 1px blue; outline: 0px; }
+#Forms button { color: black; border: solid 1px black; outline: 0px; }
+#Forms a:focus { border: solid 1px blue; outline: 0px; }
+#Forms button:focus { border: solid 1px blue; outline: 0px; }
+#Forms img { margin-top: 1em; margin-left: auto; margin-right: auto; }
+
+* { outline: 0px; }
+a { color: #000000; text-decoration: none; }
+a:visited { color: #000000; }
+a:hover { color: #0000ff; text-decoration: underline; background: #eeeeee; }
+
+/* jquery ui dialogs */
+.ui-widget-overlay { background: white; }
+.ui-dialog { background: white; border: solid 1px gray; }
+.ui-dialog-title { font-size: 2em; font-weight: bold; }
+.ui-dialog-titlebar-close { display: none; }
+.ui-dialog-content { margin: 5px; font-size: 1.2em; overflow: hidden; }
+.ui-dialog-buttonpane { text-align: center; margin-top: 1em; margin-bottom: 5px; }
+.ui-dialog-buttonpane button { padding: 5px; border: solid 1px black; width: 10em; }

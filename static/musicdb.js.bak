@@ -1,0 +1,375 @@
+m = {
+	/*
+	 * avoid hard-coding column numbers
+	 */
+	ARTIST_COL: 0,
+	RELEASE_COL: 1,
+	FORMAT_COL: 2,
+	LABEL_COL: 3,
+	CATNO_COL: 4,
+	YEAR_COL: 5,
+
+	/*
+	 * handlers for form buttons
+	 */
+	formButtons: {
+		addArtist: {
+			'add':		function() { m.showReleaseTable(); m.loadArtistList(); },
+			'cancel':	function() { m.showReleaseTable(); }
+		},
+		editArtist: {
+			'update':	function() { m.loadReleaseTable(); m.loadArtistList(); },
+			'delete':	function() { m.showReleaseTable(); m.loadArtistList(); },
+			'cancel':	function() { history.go(-1); /*m.showReleaseTable();*/ }
+		},
+		addLabel: {
+			'add':		function() { m.showReleaseTable(); m.loadLabelList(); },
+			'cancel':	function() { m.showReleaseTable(); }
+		},
+		editLabel: {
+			'update':	function() { m.loadReleaseTable(); m.loadArtistList(); },
+			'delete':	function() { m.showReleaseTable(); m.loadArtistList(); },
+			'cancel':	function() { m.showReleaseTable(); }
+		},
+		addFormat: {
+			'add':		function() { m.showReleaseTable(); m.loadFormatList(); },
+			'cancel':	function() { m.showReleaseTable(); }
+		},
+		editFormat: {
+			'update':	function() { m.loadReleaseTable(); m.loadArtistList(); },
+			'delete':	function() { m.showReleaseTable(); m.loadArtistList(); },
+			'cancel':	function() { m.showReleaseTable(); }
+		},
+		addRelease: {
+			'add':		function() { m.showReleaseTable(); m.loadFormatList(); },
+			'cancel':	function() { m.showReleaseTable(); }
+		},
+		editRelease: {
+			'update':	function() { m.loadReleaseTable(); m.loadArtistList(); },
+			'delete':	function() { m.showReleaseTable(); m.loadArtistList(); },
+			'cancel':	function() { m.showReleaseTable(); }
+		},
+		doLogin: {
+			'login':	function() { m.showReleaseTable(); },
+			'cancel':	function() { m.showReleaseTable(); }
+		}
+	},
+
+	/*
+	 * actions for link clicks
+	 */
+	actions: {
+		filter: function(data) {
+			if ('col' in data && 'href' in data) {
+				m.showReleaseTable();
+				$('#ReleaseTable tbody tr')
+					.hide()
+					.find('td:eq('+data.col+'):has(a[href='+data.href+'])')
+						.closest('tr').show();
+			}
+		},
+		artistFilter: function(data) {
+			if ('col' in data && 'href' in data) {
+				m.showReleaseTable();
+				$('#ReleaseTable tbody tr').hide();
+				var ref = data.href.replace('/artist/', '/alias/');
+				$.get(ref, null, function(result, status, xhr) {
+					$(result).find('artist').each(function() {
+						$('#ReleaseTable tbody tr')
+							.find('td:eq('+data.col+'):has(a[href='+$(this).attr('uri')+'])')
+								.closest('tr').show();
+					});
+				});
+			}
+		},
+		showAll: function(data) {
+			m.showReleaseTable();
+			$('#ReleaseTable tbody tr').show();
+		},
+		loadForm: function(data) {
+			if ('name' in data && 'href' && data) {
+				m.hideReleaseTable();
+				var btn = m.formButtons[data.name];
+				$('#Forms').load(data.href, function(responseText, textStatus, xhr) {
+					console.log(textStatus);
+					if (textStatus == 'error')
+						return;
+					$('#Forms')
+						.find('button').each(function() {
+							var buttonName = $(this).attr('name');
+							if (buttonName in btn)
+								$(this).data({Click:{type:'Button', key:buttonName, handler:btn[buttonName]}});
+							else
+								$(this).hide();
+						}).end()
+						.find('#DiscogsLink').data({Click:{type:'Discogs'}}).end()
+						.find('input:eq(0)').focus();
+					m.fixupMultipleSelect();
+				});
+			}
+		}
+	},
+
+	/*
+	 * encoding and decoding GET parameter strings
+	 */
+	decodeGET: function(args) {
+		var result = {};
+		args.split('&')
+			.map(function(s) { return s.split('=', 2); })
+			.map(function(t) { result[t[0]] = unescape(t[1]); });
+		return result;
+	},
+	encodeGET: function(obj) {
+		var result = '';
+		for (var name in obj) 
+			result += (result ? '&' : '')+name+'='+escape(obj[name]);
+		return result;
+	},
+
+	/*
+	 * generating pieces of (X|HT|XHT)ML
+	 */
+	xml: function(node) {
+		if (typeof node == 'object' && node.isArray) {
+			var result = document.createElement(node[0]);
+			for (var i = 1; i < node.length; i++)
+				if (typeof node[i] == 'object' && !node[i].isArray) 
+					for (var attrName in node[i]) 
+						result.setAttribute(attrName, node[i][attrName]);
+				else 
+					result.appendChild(m.xml(node[i]));
+			return result;
+		}
+		else 
+			return document.createTextNode(node);
+	},
+
+	/*
+	 * replace multi-select list by a more user-friendly multi-select dropdown
+	 */
+	fixupMultipleSelect: function() {
+		$('#Forms form select[multiple]').each(function() {
+			var select = $(this).wrap(m.xml(['div', {style:'display:inline-block'}]));
+			select
+				.removeAttr('name')
+				.change(function() {
+					select.find('option[selected]').each(function() {
+						var option = $(this);
+						select.parent()
+							.append(m.xml(['div',
+								['input', {type:'hidden', name:select.attr('name'), value:option.attr('value')}],
+								['span', option.text()],
+								['a', {href:'#', style:'float:right'}, 'remove']]))
+							.find('a:last').click(function() {
+								var parent = $(this).parent(),
+									input = parent.find('input'),
+									span = parent.find('span'),
+									options = select.find('option');
+								for (var i = 1; i < options.length; i++) 
+									if ($(options[i]).text().toUpperCase() > span.text().toUpperCase()) {
+										$(options[i]).before(m.xml(['option', {value:input.attr('value')}, span.text()]));
+										parent.remove();
+										break;
+									}
+								return false;
+							});
+						option.remove();
+					});
+				})
+				.change()
+				.removeAttr('multiple')
+				.find('option')
+					.removeAttr('selected')
+				.end();
+				//.prepend(m.xml(['option', {value:-1, selected:'selected'}, '\u2002']));
+		});
+	},
+
+	/*
+	 * process information in location.hash
+	 */
+	doHash: function() {
+		if (!location.hash)
+			return;
+		var data = m.decodeGET(location.hash.substr(1));
+		if ('action' in data)
+			m.actions[data.action](data);
+	},
+	
+	/*
+	 * return event handler for an event name
+	 */
+	dispatcher: function(eventName) {
+		return function(e) {
+			var event = $(e.target).data(eventName);
+			if (!event)
+				return;
+			var type = event['type'];
+			if (type) {
+				var handlerName = 'on' + type + eventName;
+				var handler = m[handlerName];
+				if (handler) {
+					handler(e);
+					e.preventDefault();
+				}
+			}
+		}
+	},
+	
+	/*
+	 * event handlers for click events (mostly/entirely consists of replacing location.hash)
+	 */
+	onFilterClick: function(e) {
+		var elem = $(e.target);
+		var data = elem.data('Click');
+		var href = elem.attr('href');
+		location.hash = m.encodeGET({action:'filter', col:data.col, href:href});
+	},
+	onArtistFilterClick: function(e) {
+		var elem = $(e.target);
+		var data = elem.data('Click');
+		var href = elem.attr('href');
+		location.hash = m.encodeGET({action:'artistFilter', col:data.col, href:href});
+	},
+	onButtonClick: function(e) {
+		var elem = $(e.target);
+		var data = elem.data('Click');
+		if (elem.attr('type') == 'reset') {
+			data.handler();
+		} else {
+			var form = elem.closest('form');
+			$.post(form.attr('action'), form.serialize()+'&'+data.key+'=', data.handler);
+		}
+	},
+	onLoadFormClick: function(e) {
+		var elem = $(e.target);
+		var name = elem.data('Click').name;
+		var href = elem.attr('href');
+		location.hash = m.encodeGET({action:'loadForm', name:name, href:href});
+	},
+	onShowAllLinkClick: function(e) {
+		location.hash = m.encodeGET({action:'showAll'});
+	},
+	
+	/*
+	 * showing and hiding parts of the interface
+	 */
+	showReleaseTable: function() {
+		$('#Main').show();
+		$('#Forms').hide();
+	},
+	hideReleaseTable: function() {
+		$('#Main').hide();
+		$('#Forms').show();
+	},	
+
+	/*
+	 * reloading data lists
+	 */
+	loadArtistList: function() { $('#ArtistList').load('/musicdb/artist?xslt=artist.xsl', null, m.initArtistList); },
+	loadLabelList: function() { $('#LabelList').load('/musicdb/label?xslt=label.xsl', null, m.initLabelList); },
+	loadFormatList: function() { $('#FormatList').load('/musicdb/format?xslt=format.xsl', null, m.initFormatList); },
+	loadReleaseTable: function() { $('#Main').load('/musicdb/release?xslt=release.xsl', null, m.initReleaseTable); },
+	
+	/*
+	 * (re)initializing data lists
+	 */
+	initArtistList: function() {
+		$('#ArtistList li')
+			.find('a:eq(0)').data({Click:{type:'ArtistFilter', col:m.ARTIST_COL}}).end()
+			.find('a:eq(1)').data({Click:{type:'LoadForm', name:'editArtist'}}).end();
+	},
+	initLabelList: function() {
+		$('#LabelList li')
+			.find('a:eq(0)').data({Click:{type:'Filter', col:m.LABEL_COL}}).end()
+			.find('a:eq(1)').data({Click:{type:'LoadForm', name:'editLabel'}}).end();
+	},
+	initFormatList: function() {
+		$('#FormatList li')
+			.find('a:eq(0)').data({Click:{type:'Filter', col:m.FORMAT_COL}}).end()
+			.find('a:eq(1)').data({Click:{type:'LoadForm', name:'editFormat'}}).end();
+	},
+	initReleaseTable: function() {
+		$('#ReleaseTable')
+			.find('tbody tr')
+				.find('td:eq('+m.ARTIST_COL +') a').data({Click:{type:'ArtistFilter', col:m.ARTIST_COL}}).end()
+				.find('td:eq('+m.RELEASE_COL+') a').data({Click:{type:'LoadForm', name:'editRelease'}}).end()
+				.find('td:eq('+m.FORMAT_COL +') a').data({Click:{type:'Filter', col:m.FORMAT_COL}}).end()
+				.find('td:eq('+m.LABEL_COL  +') a').data({Click:{type:'Filter', col:m.LABEL_COL}}).end()
+			.end()
+			.tablesorter({sortList:[[m.LABEL_COL,0], [m.YEAR_COL,0], [m.CATNO_COL,0]]});
+		m.showReleaseTable();
+		m.doHash();
+	},
+
+	/*
+	 * attach events to menu
+	 */
+	initMenuList: function() {
+		$('#AddArtistLink').data({Click:{type:'LoadForm', name:'addArtist'}});
+		$('#AddLabelLink').data({Click:{type:'LoadForm', name:'addLabel'}});
+		$('#AddFormatLink').data({Click:{type:'LoadForm', name:'addFormat'}});
+		$('#AddReleaseLink').data({Click:{type:'LoadForm', name:'addRelease'}});
+		$('#LoginLink').data({Click:{type:'LoadForm', name:'doLogin'}});
+		$('#ShowAllLink').data({Click:{type:'ShowAllLink'}});
+	},
+	initMenu: function() {
+		$('#Menu').accordion('destroy');
+		$('#Menu').accordion({header:'h1', fillSpace:true});
+	},
+	
+	/*
+	 * set up timer for watching location.hash
+	 */
+	initBackForwardButtons: function() {
+		var current = location.hash;
+		/*setInterval(function() {
+			if (current != location.hash) {
+				current = location.hash;
+				m.doHash();
+			}
+		}, 50);*/
+		addEventListener('hashchange', function(e) {
+			if (current != location.hash) {
+				current = location.hash;
+				m.doHash();
+			}
+		});
+	},
+
+	/*
+	 * initialize the JS stuff
+	 */
+	init: function() {
+		// show ajax errors 
+		$.ajaxSetup({
+			error: function(xhr, textStatus, errorThrown) {
+				alert(xhr.responseText);
+			}
+		});
+
+		// attach data to elements for use in event handlers
+		m.initMenu();
+		m.initMenuList();
+		m.initArtistList();
+		m.initLabelList();
+		m.initFormatList();
+		m.initReleaseTable();
+		m.initBackForwardButtons();
+
+		// attach event dispatcher
+		$('body').click(m.dispatcher('Click'));
+		
+		// hide part of interface 
+		$('#Forms').hide();
+		
+		// initialize location.hash
+		if (!location.hash)
+			location.hash = m.encodeGET({action:'showAll'});
+		
+		//m.doHash();
+	}
+}
+Array.prototype.isArray = true;
+$(m.init);
