@@ -1,5 +1,5 @@
 NAME = musicdb
 LIB = core
-PKG = webob lxml
+PKG = webob lxml mysql-python
 
 include Makefile.inc
