@@ -48,7 +48,6 @@ deploy: runtime deploy-code deploy-web deploy-conf touch-conf
 
 deploy-code:
 	$(ENV)/bin/pip install $(SRC)
-	rm -rf /tmp/pip-*-{build,unpack}
 
 deploy-web:
 	@rm -rf $(DEPLOY_WEB)
