@@ -6,7 +6,7 @@ from glob import glob
 setup(
     name='www-musicdb',
     version='0.1.0',
-    packages=['mp3'],
+    packages=['musicdb', 'musicdb.model', 'musicdb.view', 'musicdb.ctrl'],
     author='Joost Molenaar',
     author_email='j.j.molenaar@gmail.com',
     #data_files={

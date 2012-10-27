@@ -24,7 +24,7 @@ PIP_CACHE = .cache
 .PHONY: run
 
 test: runtime
-	$(ENV)/bin/pip uninstall $(PIP_NAME) || true
+	-yes | $(ENV)/bin/pip uninstall $(PIP_NAME)
 	$(ENV)/bin/python -m $(MAIN)
 
 run: deploy
@@ -43,12 +43,12 @@ endif
 	virtualenv $(ENV) 
 	$(ENV)/bin/easy_install -U distribute
 	$(ENV)/bin/pip install --upgrade --requirement $(REQ) --download-cache $(PIP_CACHE) 
-	rm -rf /tmp/pip-*-{build,unpack}
 
 deploy: runtime deploy-code deploy-web deploy-conf touch-conf
 
 deploy-code:
 	$(ENV)/bin/pip install $(SRC)
+	rm -rf /tmp/pip-*-{build,unpack}
 
 deploy-web:
 	@rm -rf $(DEPLOY_WEB)
