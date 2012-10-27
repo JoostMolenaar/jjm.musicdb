@@ -1,0 +1,7 @@
+mysql-python
+pygraphviz
+lxml
+WebOb
+pytz
+git+file:///home/joost/git/core
+
