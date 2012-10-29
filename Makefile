@@ -1,18 +1,11 @@
 
 include Makefile.inc
 
-live ?= 0
+ENV = env
 
-ifeq ($(live),1)
-    ENV = /srv/$(NAME)
-    SUDO = sudo
-else
-    ENV = env
-    SUDO =
-endif
-
-USER = $(shell id -un)
-GROUP = $(shell id -gn)
+TARGET = /srv/$(NAME)
+TARGET_USER ?= www-data
+TARGET_GROUP ?= www-data
 
 DEPLOY_WEB = $(ENV)/web
 DEPLOY_CONF = $(ENV)/conf
@@ -23,31 +16,31 @@ PIP_CACHE = .cache
 
 .PHONY: run
 
-test: runtime
-	-yes | $(ENV)/bin/pip uninstall $(PIP_NAME)
+run: runtime
+	yes | $(ENV)/bin/pip uninstall $(PIP_NAME) || true
 	$(ENV)/bin/python -m $(MAIN)
 
-run: deploy
+run-pkg: deploy
 	$(ENV)/bin/pip install $(SRC) 
 	cd $(ENV) ; bin/python -m $(MAIN)
+
+deploy-live: deploy
+	virtualenv --relocatable $(ENV) > /dev/null
+	sudo chown -R $(TARGET_USER).$(TARGET_GROUP) $(ENV)
+	sudo rm -rf $(TARGET)
+	sudo mv $(ENV) $(TARGET)
+
+deploy: runtime deploy-code deploy-web deploy-conf touch-conf
 
 runtime: $(ENV)
 
 $(ENV):
-ifeq ($(live),1)
-	$(SUDO) mkdir -p $(ENV)
-	$(SUDO) chown $(USER).$(GROUP) $(ENV)
-else
-	mkdir -p $(ENV)
-endif
-	virtualenv $(ENV) 
-	$(ENV)/bin/easy_install -U distribute
-	$(ENV)/bin/pip install --upgrade --requirement $(REQ) --download-cache $(PIP_CACHE) 
-
-deploy: runtime deploy-code deploy-web deploy-conf touch-conf
+	virtualenv $(ENV) --quiet
+	$(ENV)/bin/pip install --upgrade --download-cache $(PIP_CACHE) 'distribute>=0.6.30' --quiet
+	$(ENV)/bin/pip install --upgrade --download-cache $(PIP_CACHE) --requirement $(PIP_REQ) --quiet
 
 deploy-code:
-	$(ENV)/bin/pip install $(SRC)
+	$(ENV)/bin/pip install $(SRC) --quiet
 
 deploy-web:
 	@rm -rf $(DEPLOY_WEB)
@@ -66,4 +59,7 @@ clean:
 really-clean: clean
 	rm -rf $(PIP_CACHE)
 
+# - rename web to static
+# - extract xml from core
+# - extract sh from core
 
