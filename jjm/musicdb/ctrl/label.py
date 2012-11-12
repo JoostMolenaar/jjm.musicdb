@@ -1,23 +1,21 @@
 import webob
 import webob.exc
 
-import core
+import jjm.core
+import jjm.musicdb.model.db
+import jjm.musicdb.view.label
 
-import musicdb.model.db
-
-import musicdb.view.label
-
-class LabelEditForm(core.Resource):
-	@core.xslt
+class LabelEditForm(jjm.core.Resource):
+	@jjm.core.xslt
 	def GET(self, request, labelID):
-		db = musicdb.model.db.DB()
+		db = jjm.musicdb.model.db.DB()
 		l = db.label.get_by_id(labelID)
 		lx = db.label.get()
-		return webob.Response(body=musicdb.view.label.label_form(lx, l))
+		return webob.Response(body=jjm.musicdb.view.label.label_form(lx, l))
 
-	@core.authenticated('EditData')
+	@jjm.core.authenticated('EditData')
 	def POST(self, request, labelID):
-		db = musicdb.model.db.DB()
+		db = jjm.musicdb.model.db.DB()
 		if 'delete' in request.POST:
 			db.label.delete(labelID)
 			raise webob.exc.HTTPOk()
@@ -27,23 +25,23 @@ class LabelEditForm(core.Resource):
 		else:
 			raise webob.exc.HTTPNotImplemented(labelID + ': ' + repr(request.POST))
 
-class LabelAddForm(core.Resource):
-	@core.xslt
+class LabelAddForm(jjm.core.Resource):
+	@jjm.core.xslt
 	def GET(self, request):
-		db = musicdb.model.db.DB()
+		db = jjm.musicdb.model.db.DB()
 		lx = db.label.get()
-		return webob.Response(body=musicdb.view.label.label_form(lx))
+		return webob.Response(body=jjm.musicdb.view.label.label_form(lx))
 
-	@core.authenticated('EditData')
+	@jjm.core.authenticated('EditData')
 	def POST(self, request):
-		db = musicdb.model.db.DB()
+		db = jjm.musicdb.model.db.DB()
 		db.label.add(request.POST['LabelName'], request.POST['ParentID'])
 		raise webob.exc.HTTPCreated()
 
-class LabelRoot(core.Resource):
-	@core.xslt
+class LabelRoot(jjm.core.Resource):
+	@jjm.core.xslt
 	def GET(self, request):
-		db = musicdb.model.db.DB()
+		db = jjm.musicdb.model.db.DB()
 		l = db.label.get()
-		return webob.Response(body=musicdb.view.label.label_list(l))
+		return webob.Response(body=jjm.musicdb.view.label.label_list(l))
 

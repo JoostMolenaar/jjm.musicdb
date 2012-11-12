@@ -1,7 +1,8 @@
 import webob
-import core
 
-class FileServer(core.Resource):
+import jjm.core
+
+class FileServer(jjm.core.Resource):
     def __init__(self, content_type, path):
         self.content_type = content_type
         self.path = path

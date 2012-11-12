@@ -1,9 +1,9 @@
+import urllib2
+
 import webob
 import webob.exc
 
-import core
-
-import urllib2
+import jjm.core
 
 def _get_discogs(url):
     req = urllib2.Request(url)
@@ -17,11 +17,11 @@ def _get_discogs(url):
     return response
 
 
-class DiscogsSearch(core.Resource):
+class DiscogsSearch(jjm.core.Resource):
     def GET(self, request):
         url = 'http://www.discogs.com/search?api_key=b53fa1f10b&f=xml&{0}'.format(request.query_string)
         return _get_discogs(url)
 
-class DiscogsRelease(core.Resource):
+class DiscogsRelease(jjm.core.Resource):
     def GET(self, request):
         return webob.Response(body='release: ' + request.path_info, content_type='text/plain')

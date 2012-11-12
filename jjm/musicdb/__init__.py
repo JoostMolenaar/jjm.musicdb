@@ -1,6 +1,5 @@
+import ctrl
 import model
 import view
-import ctrl
-
-import main
+#import main
 

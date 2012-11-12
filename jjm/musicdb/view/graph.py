@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+
 import pygraphviz as pg
 
 def draw_graph(nodes, labels, selected=None, directed=False):

@@ -1,22 +1,20 @@
 import webob
 import webob.exc
 
-import core
+import jjm.core
+import jjm.musicdb.model.db
+import jjm.musicdb.view.format
 
-import musicdb.model.db
-
-import musicdb.view.format
-
-class FormatEditForm(core.Resource):
-    @core.xslt
+class FormatEditForm(jjm.core.Resource):
+    @jjm.core.xslt
     def GET(self, request, formatID):
-        db = musicdb.model.db.DB()
+        db = jjm.musicdb.model.db.DB()
         fx = db.format.get_by_id(formatID)
-        return webob.Response(body=musicdb.view.format.format_form(fx))
+        return webob.Response(body=jjm.musicdb.view.format.format_form(fx))
 
-    @core.authenticated('EditData')
+    @jjm.core.authenticated('EditData')
     def POST(self, request, formatID):
-        db = musicdb.model.db.DB()
+        db = jjm.musicdb.model.db.DB()
         if 'delete' in request.POST:
             db.format.delete(formatID)
             raise webob.exc.HTTPOk()
@@ -26,20 +24,21 @@ class FormatEditForm(core.Resource):
         else:
             raise webob.exc.HTTPNotImplemented(formatID + ': ' + repr(request.POST))
 
-class FormatAddForm(core.Resource):
-    @core.xslt
+class FormatAddForm(jjm.core.Resource):
+    @jjm.core.xslt
     def GET(self, request):
-        return webob.Response(body=musicdb.view.format.format_form())
+        return webob.Response(body=jjm.musicdb.view.format.format_form())
 
-    @core.authenticated('EditData')
+    @jjm.core.authenticated('EditData')
     def POST(self, request):
         db = musicdb.model.db.DB()
         db.format.add(request.POST['FormatName'])
         raise webob.exc.HTTPCreated()
 
-class FormatRoot(core.Resource):
-    @core.xslt
+class FormatRoot(jjm.core.Resource):
+    @jjm.core.xslt
     def GET(self, request):
-        db = musicdb.model.db.DB()
+        db = jjm.musicdb.model.db.DB()
         f = db.format.get()
-        return webob.Response(body=musicdb.view.format.format_list(f))
+        return webob.Response(body=jjm.musicdb.view.format.format_list(f))
+

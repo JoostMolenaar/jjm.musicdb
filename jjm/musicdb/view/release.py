@@ -1,4 +1,5 @@
-import core.xml
+
+import jjm.core
 
 def release_list(ax, lx, fx, rx, arx):
     ax = dict((a.ArtistID, a) for a in ax)
@@ -22,7 +23,7 @@ def release_form(ax, lx, fx, r=None, arx=None):
     return ['release',
                 ('mode', r and 'edit' or 'add'),
                 ['uri', r and r.ShortURL or '/musicdb/release/new'],
-                r and [core.xml.FRAGMENT] + [ ['artist', ('artistID', ar.ArtistID)] for ar in arx ] or ['artist'],
+                r and [jjm.core.xml.FRAGMENT] + [ ['artist', ('artistID', ar.ArtistID)] for ar in arx ] or ['artist'],
                 r and ['label', ('labelID', r.LabelID)] or ['label'],
                 r and ['format', ('formatID', r.FormatID)] or ['format'],
                 r and ['catno', r.CatNo] or '',
