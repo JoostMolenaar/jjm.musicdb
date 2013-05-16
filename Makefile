@@ -22,6 +22,19 @@ SITE_PACKAGES = $(ENV)/lib/python2.7/site-packages
 test: runtime-test
 	cd $(ENV) ; bin/python -m $(MAIN)
 
+unittest:
+	cd tests ; ../$(ENV)/bin/python -m unittest discover
+
+coverage:
+	@rm -rf tests/htmlcov
+	cd tests ; ../$(ENV)/bin/coverage erase
+	-cd tests ; ../$(ENV)/bin/coverage run --branch -m unittest discover
+	cd tests ; ../$(ENV)/bin/coverage report
+	cd tests ; ../$(ENV)/bin/coverage html
+
+continuous:
+	inotifywait -r . -q -m -e CLOSE_WRITE | grep --line-buffered '^.*\.py$$' | while read line; do clear; date; echo $$line; echo; make coverage; done
+
 run: runtime-live
 	cd $(ENV) ; bin/python -m $(MAIN)
 
@@ -69,7 +82,7 @@ deploy-code:
 	@find $(ENV) -name top_level.txt -path '*$(PIP_NAME)-*' -exec sh -c 'echo $(PIP_NAME) > {}' ';'
 
 undeploy-code:
-	$(ENV)/bin/pip uninstall --yes $(PIP_NAME) $(QUIET) || true
+	$(ENV)/bin/pip uninstall --yes $(PIP_NAME) $(QUIET) 2>&1 1>/dev/null || true
 
 link-code:
 	ln -snf $(shell pwd)/$(subst .,/,$(PIP_NAME)) $(SITE_PACKAGES)/$(subst .,/,$(PIP_NAME))

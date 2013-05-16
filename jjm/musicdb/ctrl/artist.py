@@ -39,7 +39,9 @@ class ArtistAddForm(jjm.core.Resource):
 	@jjm.core.authenticated('EditData')
 	def POST(self, request):
 		db = jjm.musicdb.model.db.DB()
-		db.artist.add(request.POST['ArtistName'], request.POST['AliasID'])
+		db.artist.add(
+            request.POST['ArtistName'], 
+            request.POST['AliasID'] if request.POST['AliasID'] != u'\u2002' else None)
 		for groupID in request.POST.getall('GroupID'):
 			db.artist_group.add(groupID, artistID)
 		raise webob.exc.HTTPCreated()

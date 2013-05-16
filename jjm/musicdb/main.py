@@ -34,7 +34,12 @@ class MusicDBRouter(jjm.core.Router):
         (r'^/musicdb/(jquery.+\.css$)$',                    jjm.core.FileServer('/web/jquery-css', 'text/css'))
     ]
 
+    #@jjm.core.session_loader
+    #def __call__(self, request, *a, **k):
+    #    super(MusicDBRouter)(request, *a, **k)
+
 app = MusicDBRouter()
+app = jjm.core.session_loader(app)
 
 if __name__ == '__main__':
     jjm.core.run_server(app)
