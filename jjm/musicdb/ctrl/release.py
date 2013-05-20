@@ -31,10 +31,11 @@ class ReleaseEditForm(jjm.core.Resource):
         elif 'update' in request.POST:
             db.artistrelease.delete_by_release_id(releaseID)
             for artistID in request.POST.getall('ArtistID'):
+                if artistID == u'\u2002': continue
                 db.artistrelease.add(artistID, releaseID)
             db.release.update(releaseID,
-                              request.POST['FormatID'],
-                              request.POST['LabelID'],
+                              request.POST['FormatID'] if request.POST['FormatID'] != u'\u2002' else None,
+                              request.POST['LabelID'] if request.POST['LabelID'] != u'\u2002' else None,
                               request.POST['CatNo'],
                               request.POST['Year'],
                               request.POST['ReleaseName'])
@@ -53,12 +54,13 @@ class ReleaseAddForm(jjm.core.Resource):
     def POST(self, request):
         #raise webob.exc.HTTPNotImplemented(str(request.POST) + ' ArtistIDs:' + str(request.POST.getall('ArtistID')))
         db = jjm.musicdb.model.db.DB()
-        _, releaseID = db.release.add(request.POST['FormatID'], 
-                                      request.POST['LabelID'],
+        _, releaseID = db.release.add(request.POST['FormatID'] if request.POST['FormatID'] != u'\u2002' else None, 
+                                      request.POST['LabelID'] if request.POST['LabelID'] != u'\u2002' else None,
                                       request.POST['CatNo'],
                                       request.POST['Year'],
                                       request.POST['ReleaseName'])
         for artistID in request.POST.getall('ArtistID'):
+            if artistID == u'\u2002': continue
             db.artistrelease.add(artistID, releaseID)
         raise webob.exc.HTTPCreated()
 
