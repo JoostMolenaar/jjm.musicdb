@@ -132,13 +132,19 @@ m = {
         var $elem = $(e.target);
         var data = $elem.data('Click');
         var href = $elem.attr('href');
-        location.hash = m.encodeGET({a:'filter', c:data.col, r:href});
+        var hash = m.getHash();
+        if (hash.a == 'filter' && hash.r == href && hash.c == data.col && hash.c != m.FORMAT_COL) {
+            m.setHash({a:'relatedFilter', r:href, c:data.col});
+        }
+        else {
+            m.setHash({a:'filter', r:href, c:data.col});
+        }
     },
     onRelatedFilterClick: function(e) {
         var $elem = $(e.target);
         var data = $elem.data('Click');
         var href = $elem.attr('href');
-        location.hash = m.encodeGET({a:'relatedFilter', c:data.col, r:href});
+        m.setHash({a:'relatedFilter', r:href, c:data.col}) 
     },
     onButtonClick: function(e) {
         var $elem = $(e.target),
@@ -190,7 +196,7 @@ m = {
         $('#ArtistList li')
             .hover(m.onLoadFormHoverIn, m.onLoadFormHoverOut)
             .find('a:eq(0)')
-                .data({Click:{type:'RelatedFilter', col:m.ARTIST_COL}})
+                .data({Click:{type:'Filter', col:m.ARTIST_COL}})
             .end()
             .find('a:eq(1)')
                 .data({Click:{type:'LoadForm', name:'editArtist'}})
@@ -201,7 +207,7 @@ m = {
         $('#LabelList li')
             .hover(m.onLoadFormHoverIn, m.onLoadFormHoverOut)
             .find('a:eq(0)')
-                .data({Click:{type:'RelatedFilter', col:m.LABEL_COL}})
+                .data({Click:{type:'Filter', col:m.LABEL_COL}})
             .end()
             .find('a:eq(1)')
                 .data({Click:{type:'LoadForm', name:'editLabel'}})
@@ -222,10 +228,10 @@ m = {
     initReleaseTable: function() {
         $('#ReleaseTable')
             .find('tbody tr')
-                .find('td:eq('+m.ARTIST_COL +') a').data({Click:{type:'RelatedFilter', col:m.ARTIST_COL}}).end()
+                .find('td:eq('+m.ARTIST_COL +') a').data({Click:{type:'Filter', col:m.ARTIST_COL}}).end()
                 .find('td:eq('+m.RELEASE_COL+') a').data({Click:{type:'LoadForm', name:'editRelease'}}).end()
                 .find('td:eq('+m.FORMAT_COL +') a').data({Click:{type:'Filter', col:m.FORMAT_COL}}).end()
-                .find('td:eq('+m.LABEL_COL  +') a').data({Click:{type:'RelatedFilter', col:m.LABEL_COL}}).end()
+                .find('td:eq('+m.LABEL_COL  +') a').data({Click:{type:'Filter', col:m.LABEL_COL}}).end()
             .end()
             .tablesorter({sortList:[[m.YEAR_COL,0], [m.LABEL_COL,0], [m.CATNO_COL,0]]});
         m.showReleaseTable();
@@ -276,6 +282,16 @@ m = {
         for (var name in obj) 
             result += (result ? '&' : '')+name+'='+escape(obj[name]);
         return result;
+    },
+
+    /*
+     * location.hash utility functions
+     */
+    getHash: function() {
+        return m.decodeGET(location.hash.substr(1))
+    },
+    setHash: function(h) {
+        location.hash = m.encodeGET(h);
     },
 
     /*
