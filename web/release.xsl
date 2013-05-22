@@ -34,12 +34,12 @@
                 </a>
             </td>
             <td>
-                <xsl:call-template name="ref">
+                <xsl:call-template name="formatref">
                     <xsl:with-param name="ref" select="@format"/>
                 </xsl:call-template>
             </td>
             <td>
-                <xsl:call-template name="ref">
+                <xsl:call-template name="labelref">
                     <xsl:with-param name="ref" select="@label"/>
                 </xsl:call-template>
             </td>
@@ -53,9 +53,45 @@
             <xsl:if test="position() != 1">
                 <xsl:text>/</xsl:text>
             </xsl:if>
-            <xsl:call-template name="ref">
+            <xsl:call-template name="artistref">
                 <xsl:with-param name="ref" select="@ref"/>
             </xsl:call-template>
+        </xsl:for-each>
+    </xsl:template>
+
+    <xsl:template name="artistref">
+        <xsl:param name="ref"/>
+        <xsl:for-each select="/musicDB/artists/artist[@uri=$ref]">
+            <a>
+                <xsl:attribute name="href">
+                    <xsl:value-of select="@uri"/>
+                </xsl:attribute>
+                <xsl:value-of select="@name"/>
+            </a>
+        </xsl:for-each>
+    </xsl:template>
+
+    <xsl:template name="labelref">
+        <xsl:param name="ref"/>
+        <xsl:for-each select="/musicDB/labels/label[@uri=$ref]">
+            <a>
+                <xsl:attribute name="href">
+                    <xsl:value-of select="@uri"/>
+                </xsl:attribute>
+                <xsl:value-of select="@name"/>
+            </a>
+        </xsl:for-each>
+    </xsl:template>
+
+    <xsl:template name="formatref">
+        <xsl:param name="ref"/>
+        <xsl:for-each select="/musicDB/formats/format[@uri=$ref]">
+            <a>
+                <xsl:attribute name="href">
+                    <xsl:value-of select="@uri"/>
+                </xsl:attribute>
+                <xsl:value-of select="@name"/>
+            </a>
         </xsl:for-each>
     </xsl:template>
 
