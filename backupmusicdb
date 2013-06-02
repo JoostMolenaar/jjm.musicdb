@@ -1,0 +1,3 @@
+#!/bin/bash
+mysqldump --user root -pmysqlroot musicdb | mailx -s "MusicDB backup $(date --rfc-3339=date)" j.j.molenaar@gmail.com
+
