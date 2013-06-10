@@ -63,14 +63,8 @@ deploy-pkgs: $(addprefix $(ENV)/lib/python2.7/site-packages/.egg-,$(PKG))
 
 $(ENV)/lib/python2.7/site-packages/.egg-%:
 	$(ENV)/bin/pip install --upgrade $(PKG_BASE)/$* $(QUIET)
-	find $(ENV) -name top_level.txt -path '*$*-*' -exec sh -c 'echo $* > {}' ';'
-	touch $@
-
-undeploy-pkgs: $(addprefix undeploy-pkg-,$(PKG))
-
-undeploy-pkg-%:
-	$(ENV)/bin/pip uninstall $(PKG_BASE)/$* $(QUIET)
-	rm -f $(ENV)/lib/python2.7/site-packages/.egg-$*
+	@find $(ENV) -name top_level.txt -path '*$*-*' -exec sh -c 'echo $* > {}' ';'
+	@touch $@
 
 #
 # code
