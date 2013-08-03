@@ -1,12 +1,12 @@
 NAME = musicdb
 
-PIP_NAME = jjm.musicdb
+PIP_NAME = musicdb
 PIP_REQ = requirements.txt
 
 PKG_BASE = file:///home/joost/git
-PKG = jjm jjm.core
+PKG = core
 
 STATIC_DIRS = conf web
 
-MAIN ?= jjm.musicdb.main
+MAIN ?= musicdb.main
 
