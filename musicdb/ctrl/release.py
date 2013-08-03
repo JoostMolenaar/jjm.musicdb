@@ -1,29 +1,29 @@
 import webob.exc
 
-import jjm.core
+import core
 
-import jjm.musicdb.model.db
+import musicdb.model.db
 
-import jjm.musicdb.view.artist
-import jjm.musicdb.view.label
-import jjm.musicdb.view.format
-import jjm.musicdb.view.release
+import musicdb.view.artist
+import musicdb.view.label
+import musicdb.view.format
+import musicdb.view.release
 
-class ReleaseEditForm(jjm.core.Resource):
-    @jjm.core.xslt
+class ReleaseEditForm(core.Resource):
+    @core.xslt
     def GET(self, request, releaseID):
-        db = jjm.musicdb.model.db.DB()
+        db = musicdb.model.db.DB()
         ax = db.artist.get()
         lx = db.label.get()
         fx = db.format.get()
         arx = dict(db.artistrelease.get_by_release_id(releaseID))[int(releaseID)]
         rx = db.release.get_by_id(releaseID)
-        return webob.Response(body=jjm.musicdb.view.release.release_form(ax, lx, fx, rx, arx))
+        return webob.Response(body=musicdb.view.release.release_form(ax, lx, fx, rx, arx))
 
-    @jjm.core.authenticated('EditData')
+    @core.authenticated('EditData')
     def POST(self, request, releaseID):
         #raise webob.exc.HTTPNotImplemented(releaseID + ': ' + str(request.POST))
-        db = jjm.musicdb.model.db.DB()
+        db = musicdb.model.db.DB()
         if 'delete' in request.POST:
             db.artistrelease.delete_by_release_id(releaseID)
             db.release.delete(releaseID)
@@ -41,19 +41,19 @@ class ReleaseEditForm(jjm.core.Resource):
                               request.POST['ReleaseName'])
             raise webob.exc.HTTPOk()
 
-class ReleaseAddForm(jjm.core.Resource):
-    @jjm.core.xslt
+class ReleaseAddForm(core.Resource):
+    @core.xslt
     def GET(self, request):
-        db = jjm.musicdb.model.db.DB()
+        db = musicdb.model.db.DB()
         ax = db.artist.get()
         lx = db.label.get()
         fx = db.format.get()
-        return webob.Response(body=jjm.musicdb.view.release.release_form(ax, lx, fx))
+        return webob.Response(body=musicdb.view.release.release_form(ax, lx, fx))
 
-    @jjm.core.authenticated('EditData')
+    @core.authenticated('EditData')
     def POST(self, request):
         #raise webob.exc.HTTPNotImplemented(str(request.POST) + ' ArtistIDs:' + str(request.POST.getall('ArtistID')))
-        db = jjm.musicdb.model.db.DB()
+        db = musicdb.model.db.DB()
         _, releaseID = db.release.add(request.POST['FormatID'] if request.POST['FormatID'] != u'\u2002' else None, 
                                       request.POST['LabelID'] if request.POST['LabelID'] != u'\u2002' else None,
                                       request.POST['CatNo'],
@@ -64,10 +64,10 @@ class ReleaseAddForm(jjm.core.Resource):
             db.artistrelease.add(artistID, releaseID)
         raise webob.exc.HTTPCreated()
 
-class ReleaseRoot(jjm.core.Resource):
-    @jjm.core.xslt
+class ReleaseRoot(core.Resource):
+    @core.xslt
     def GET(self, request):
-        db = jjm.musicdb.model.db.DB()
+        db = musicdb.model.db.DB()
         ax = db.artist.get()
         lx = db.label.get()
         fx = db.format.get()
@@ -75,15 +75,15 @@ class ReleaseRoot(jjm.core.Resource):
         arx = dict(db.artistrelease.get())
         return webob.Response(body=
             ['musicDB',
-                jjm.musicdb.view.artist.artist_list(ax),
-                jjm.musicdb.view.label.label_list(lx),
-                jjm.musicdb.view.format.format_list(fx),
-                jjm.musicdb.view.release.release_list(ax, lx, fx, rx, arx)])
+                musicdb.view.artist.artist_list(ax),
+                musicdb.view.label.label_list(lx),
+                musicdb.view.format.format_list(fx),
+                musicdb.view.release.release_list(ax, lx, fx, rx, arx)])
 
-class ReleaseJSON(jjm.core.Resource):
-	@jjm.core.transformer
+class ReleaseJSON(core.Resource):
+	@core.transformer
 	def GET(self, request):
-		db = jjm.musicdb.model.db.DB()
+		db = musicdb.model.db.DB()
 		ax = db.artist.get() ; aid = dict((a.ArtistID, a.ShortURL) for a in ax)
 		lx = db.label.get() ; lid = dict((l.LabelID, l.ShortURL) for l in lx)
 		fx = db.format.get() ; fid = dict((f.FormatID, f.ShortURL) for f in fx)

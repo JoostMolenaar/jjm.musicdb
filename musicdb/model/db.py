@@ -1,4 +1,4 @@
-import jjm.core
+import core
 
 import artist
 import label
@@ -7,9 +7,9 @@ import release
 import artistrelease
 import artistgroup
 
-class DB(jjm.core.model.Model):
-	def __init__(self, provider=jjm.core.model.MySQLProvider):
-		jjm.core.model.Model.__init__(self, provider)
+class DB(core.model.Model):
+	def __init__(self, provider=core.model.MySQLProvider):
+		core.model.Model.__init__(self, provider)
 
 		self.artist = artist.Artist(self.provider)
 		self.label = label.Label(self.provider)

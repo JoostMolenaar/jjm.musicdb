@@ -1,4 +1,4 @@
-import jjm.core.model
+import core.model
 
 import artistgroup
 import artist

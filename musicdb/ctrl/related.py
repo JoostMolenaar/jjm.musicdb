@@ -1,12 +1,12 @@
 import webob
 
-import jjm.core
-import jjm.musicdb.model.db
-import jjm.musicdb.view.artist
-import jjm.musicdb.view.label
-import jjm.musicdb.view.graph
+import core
+import musicdb.model.db
+import musicdb.view.artist
+import musicdb.view.label
+import musicdb.view.graph
 
-class ArtistBase(jjm.core.Resource):
+class ArtistBase(core.Resource):
 	def get_related(self, db, artist_id):
 		tried = [artist_id]
 		result = db.artist.get_related(artist_id)
@@ -21,16 +21,16 @@ class ArtistBase(jjm.core.Resource):
 		return result
 		
 class Artist(ArtistBase):
-	@jjm.core.xslt
+	@core.xslt
 	def GET(self, request, artist_id):
-		db = jjm.musicdb.model.db.DB()
+		db = musicdb.model.db.DB()
 		related = self.get_related(db, artist_id)
-		jjm.core.debug(request, `related`+'\n')
-		return webob.Response(body=jjm.musicdb.view.artist.artist_list(related))
+		core.debug(request, `related`+'\n')
+		return webob.Response(body=musicdb.view.artist.artist_list(related))
 
 class ArtistAsGraph(ArtistBase):
 	def GET(self, request, artist_id):
-		db = jjm.musicdb.model.db.DB()
+		db = musicdb.model.db.DB()
 		artists = self.get_related(db, artist_id)
 		for artist in artists:
 			if not artist.AliasID: # dan zal het wel een groep zijn, leden ophalen
@@ -41,14 +41,14 @@ class ArtistAsGraph(ArtistBase):
 			(a.ArtistID, ([a.AliasID] if a.AliasID else []) + a.Members)
 			for a in artists)
 		node_text = dict((a.ArtistID, a.Name) for a in artists)
-		jjm.core.debug(request, repr(graph)+'\n')
-		jjm.core.debug(request, repr(node_text)+'\n')
+		core.debug(request, repr(graph)+'\n')
+		core.debug(request, repr(node_text)+'\n')
 		return webob.Response(
-			body=jjm.musicdb.view.graph.draw_graph(graph, node_text, directed=False),
+			body=musicdb.view.graph.draw_graph(graph, node_text, directed=False),
 			content_type='image/png',
 			cache_control='no-store, no-cache')			
 
-class LabelBase(jjm.core.Resource):
+class LabelBase(core.Resource):
 	def get_all_children(self, db, label_node):
 		yield label_node
 		for label in db.label.get_children(label_node.LabelID):
@@ -62,22 +62,22 @@ class LabelBase(jjm.core.Resource):
 		return list(self.get_all_children(db, root))
 
 class Label(LabelBase):		
-	@jjm.core.xslt
+	@core.xslt
 	def GET(self, request, label_id):
-		db = jjm.musicdb.model.db.DB()
+		db = musicdb.model.db.DB()
 		return webob.Response(
-			body=jjm.musicdb.view.label.label_list(self.find_related(db, label_id)))
+			body=musicdb.view.label.label_list(self.find_related(db, label_id)))
 
 class LabelAsGraph(LabelBase):
 	def GET(self, request, label_id):
-		db = jjm.musicdb.model.db.DB()
+		db = musicdb.model.db.DB()
 		labels = self.find_related(db, label_id)
 		graph = dict(
 			(l.LabelID, [l.ParentID] if l.ParentID else [])
 			for l in labels)
 		node_text = dict((l.LabelID, l.Name) for l in labels)
 		return webob.Response(
-			body=jjm.musicdb.view.graph.draw_graph(graph, node_text, selected=label_id),
+			body=musicdb.view.graph.draw_graph(graph, node_text, selected=label_id),
 			content_type='image/png',
 			cache_control='no-store, no-cache')
 			

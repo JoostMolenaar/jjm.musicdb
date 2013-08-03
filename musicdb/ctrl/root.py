@@ -1,17 +1,17 @@
 import webob
 import webob.exc
 
-import jjm.core
-import jjm.musicdb.model.db
-import jjm.musicdb.view.release
-import jjm.musicdb.view.artist
-import jjm.musicdb.view.label
-import jjm.musicdb.view.format
+import core
+import musicdb.model.db
+import musicdb.view.release
+import musicdb.view.artist
+import musicdb.view.label
+import musicdb.view.format
 
-class Root(jjm.core.Resource):
-	@jjm.core.xslt
+class Root(core.Resource):
+	@core.xslt
 	def GET(self, request):
-		db = jjm.musicdb.model.db.DB()
+		db = musicdb.model.db.DB()
 		ax = db.artist.get()
 		lx = db.label.get()
 		fx = db.format.get()
@@ -19,7 +19,7 @@ class Root(jjm.core.Resource):
 		arx = dict(db.artistrelease.get())
 		return webob.Response(body=
 			['musicDB',
-				jjm.musicdb.view.artist.artist_list(ax),
-				jjm.musicdb.view.label.label_list(lx),
-				jjm.musicdb.view.format.format_list(fx),
-				jjm.musicdb.view.release.release_list(ax, lx, fx, rx, arx)])
+				musicdb.view.artist.artist_list(ax),
+				musicdb.view.label.label_list(lx),
+				musicdb.view.format.format_list(fx),
+				musicdb.view.release.release_list(ax, lx, fx, rx, arx)])
