@@ -9,3 +9,4 @@ STATIC_DIRS = conf web
 
 MAIN ?= musicdb.main
 
+include build/Makefile
