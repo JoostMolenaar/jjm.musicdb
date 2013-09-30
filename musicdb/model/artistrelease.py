@@ -4,7 +4,7 @@ class ArtistRelease(core.model.Model):
     @core.model.group_by('ReleaseID')
     @core.model.open_query
     def get(self):
-        return ('SELECT * FROM artist_release', [])
+        return ('SELECT * FROM artist_release ORDER BY releaseid, artistid', [])
 
     @core.model.exec_query
     def add(self, artistID, releaseID):
