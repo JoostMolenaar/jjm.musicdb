@@ -3,4 +3,6 @@ mysql-python
 pygraphviz
 lxml
 WebOb
-pytz
+pytz>=whatever
+sqlalchemy
+psycopg2
