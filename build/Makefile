@@ -5,6 +5,7 @@ PY_OPTS ?= -B
 TAG = $(subst .,,$(subst python,,$(PY_VERSION)))
 
 ENV = env$(TAG)
+WHL = /tmp/pypkg$(TAG)
 
 COVERAGE_FILE       = .coverage$(TAG)
 COVERAGE_OUTPUT_DIR = htmlcov$(TAG)
@@ -61,11 +62,12 @@ runtime-live: $(ENV) $(ENV)/.$(PIP_REQ) unlink-pkgs unlink-code unlink-data depl
 
 runtime-test: $(ENV) $(ENV)/.$(PIP_REQ) undeploy-pkgs undeploy-code undeploy-data link-pkgs link-code link-data
 
-$(ENV): 
+$(ENV): $(WHL)
 	virtualenv --python=$(PY_VERSION) $(ENV) $(QUIET)
+	$(ENV)/bin/pip install --no-index --find-links=$(WHL) --use-wheel --upgrade pip setuptools wheel $(QUIET)
 
 $(ENV)/.$(PIP_REQ): $(PIP_REQ)
-	$(ENV)/bin/pip install --upgrade --download-cache $(PIP_CACHE) --requirement $(PIP_REQ) $(QUIET)
+	$(ENV)/bin/pip install --no-index --find-links=$(WHL) --use-wheel --upgrade --requirement $(PIP_REQ) $(QUIET)
 	@touch $@
 
 #
@@ -75,7 +77,7 @@ $(ENV)/.$(PIP_REQ): $(PIP_REQ)
 deploy-pkgs: $(addprefix $(ENV)/.pkg-,$(PKG))
 
 $(ENV)/.pkg-%:
-	cd $(PKG_BASE)/$* ; ./setup.py sdist $(QUIET)
+	cd $(PKG_BASE)/$* ; ./setup.py sdist 2>&1 >/dev/null
 	$(ENV)/bin/pip install --upgrade $(PKG_BASE)/$*/dist/$*-$(shell $(PKG_BASE)/$*/setup.py --version).tar.gz
 	@touch $@
 
@@ -88,19 +90,31 @@ undeploy-pkg-%:
 link-pkgs: $(addprefix $(ENV)/.pkglink-,$(PKG))
 
 $(ENV)/.pkglink-%:
-	@IS_PACKAGE=${shell test -d $(PKG_BASE)/$*/$* && echo 1 || echo 0}
-ifeq ($(IS_PACKAGE),1)
-	ln -snf $(PKG_BASE)/$*/$* $(SITE_PACKAGES)/$*
-else
-	ln -snf $(PKG_BASE)/$*/$*.py $(SITE_PACKAGES)/$*.py
-endif
+	@test -d $(PKG_BASE)/$*/$* && ln -snfv $(PKG_BASE)/$*/$* $(SITE_PACKAGES)/$* || ln -snfv $(PKG_BASE)/$*/$*.py $(SITE_PACKAGES)/$*.py
 	@touch $@
 
 unlink-pkgs: $(addprefix unlink-pkg-,$(PKG))
 
 unlink-pkg-%:
-	@test -L $(SITE_PACKAGES)/$* && rm $(SITE_PACKAGES)/$* || true
+	@rm -vf $(SITE_PACAKAGES)/$*
 	@rm -f $(ENV)/.pkglink-$*
+
+#
+# wheels
+#
+
+$(WHL)-ok:
+	mkdir -p $(WHL)
+	virtualenv pkg-env $(QUIET)
+	pkg-env/bin/pip install --upgrade pip setuptools wheel $(QUIET)
+	pkg-env/bin/pip install --no-use-wheel --download $(WHL) pip setuptools wheel $(QUIET)
+	pkg-env/bin/pip wheel --no-index --find-links=$(WHL) --use-wheel --wheel-dir=$(WHL) pip setuptools wheel $(QUIET)
+	rm -rf pkg-env
+	touch $(WHL)-ok
+
+download: $(ENV)
+	$(ENV)/bin/pip install --no-use-wheel --download $(WHL) --requirement $(PIP_REQ) $(QUIET)
+	$(ENV)/bin/pip wheel --no-index --find-links=$(WHL) --use-wheel --wheel-dir=$(WHL) --requirement $(PIP_REQ) $(QUIET)
 
 #
 # code
@@ -122,7 +136,7 @@ deploy-data: $(addprefix $(ENV)/.data-,$(STATIC_DIRS))
 
 undeploy-data: $(addprefix undeploy-dir-,$(STATIC_DIRS))
 
-$(ENV)/.data-%: $*
+$(ENV)/.data-%: 
 	cp -r $* $(ENV)
 	@touch $@
 
@@ -171,6 +185,9 @@ coverage: runtime-test
 
 continuous-%:
 	inotifywait -r . -q -m -e CLOSE_WRITE | grep --line-buffered '^.*\.py$$' | while read line; do clear; date; echo $$line; echo; make $*; done
+
+pep8:
+	test -f $(PIP_NAME).py && $(ENV)/bin/pep8 $(PIP_NAME).py || $(ENV)/bin/pep8 $(PIP_NAME)
 
 continuous: continuous-coverage
 
