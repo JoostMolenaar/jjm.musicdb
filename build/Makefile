@@ -77,26 +77,25 @@ $(ENV)/.$(PIP_REQ): $(PIP_REQ)
 deploy-pkgs: $(addprefix $(ENV)/.pkg-,$(PKG))
 
 $(ENV)/.pkg-%:
-	cd $(PKG_BASE)/$* ; ./setup.py sdist 2>&1 >/dev/null
-	$(ENV)/bin/pip install --upgrade $(PKG_BASE)/$*/dist/$*-$(shell $(PKG_BASE)/$*/setup.py --version).tar.gz
+	$(ENV)/bin/pip install --no-index --find-links=$(WHL) --use-wheel --upgrade $* $(QUIET)
 	@touch $@
 
 undeploy-pkgs: $(addprefix undeploy-pkg-,$(PKG))
 
 undeploy-pkg-%:
-	@test -f $(ENV)/.pkg-$* && $(ENV)/bin/pip uninstall --yes $* $(QUIET) 1>/dev/null 2>&1 || true
+	@test -f $(ENV)/.pkg-$* && $(ENV)/bin/pip uninstall --yes $* $(QUIET) || true
 	@rm -f $(ENV)/.pkg-$*
 
 link-pkgs: $(addprefix $(ENV)/.pkglink-,$(PKG))
 
 $(ENV)/.pkglink-%:
-	@test -d $(PKG_BASE)/$*/$* && ln -snfv $(PKG_BASE)/$*/$* $(SITE_PACKAGES)/$* || ln -snfv $(PKG_BASE)/$*/$*.py $(SITE_PACKAGES)/$*.py
+	$(ENV)/bin/pip install --editable $(PKG_BASE)/$* $(QUIET)
 	@touch $@
 
 unlink-pkgs: $(addprefix unlink-pkg-,$(PKG))
 
 unlink-pkg-%:
-	@rm -vf $(SITE_PACAKAGES)/$*
+	@test -f $(ENV)/.pkglink-$* && $(ENV)/bin/pip uninstall --yes $* $(QUIET) || true
 	@rm -f $(ENV)/.pkglink-$*
 
 #
@@ -115,6 +114,12 @@ $(WHL)-ok:
 download: $(ENV)
 	$(ENV)/bin/pip install --no-use-wheel --download $(WHL) --requirement $(PIP_REQ) $(QUIET)
 	$(ENV)/bin/pip wheel --no-index --find-links=$(WHL) --use-wheel --wheel-dir=$(WHL) --requirement $(PIP_REQ) $(QUIET)
+
+release: $(ENV) $(addprefix release-pkg-,$(PKG)) release-pkg-$(PIP_NAME)
+
+release-pkg-%:
+	cd $(PKG_BASE)/$* ; ./setup.py sdist --dist-dir=$(WHL) $(QUIET) 1>/dev/null 2>&1 
+	$(ENV)/bin/pip wheel --no-index --find-links=$(WHL) --use-wheel --wheel-dir=$(WHL) $* $(QUIET)
 
 #
 # code
