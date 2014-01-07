@@ -1,7 +1,0 @@
-mysql-python
-pygraphviz
-lxml
-WebOb
-pytz>=whatever
-sqlalchemy
-psycopg2

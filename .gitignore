@@ -1,7 +1,7 @@
 *.pyc
 MANIFEST
-dist
-env2*
-env3*
-.cache2*
-.cache3*
+MANIFEST.in
+env27
+requirements.txt
+*.egg-info
+*.swp
