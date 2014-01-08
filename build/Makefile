@@ -1,14 +1,6 @@
 
 -include Makefile.in
 
-#PIP_NAME = $(shell ./setup.py --name)
-#PIP_REQ = requirements.txt
-
-#PKG = $(shell ./setup.py --repo-names)
-#PKG_BASE ?= $(shell readlink -f ..)
-
-#STATIC_DIRS = $(shell ./setup.py --static-dirs)
-
 PY_VERSION ?= python2.7
 PY_OPTS ?= -B 
 
