@@ -1,11 +1,13 @@
 
-PIP_NAME = $(shell ./setup.py --name)
-PIP_REQ = requirements.txt
+-include Makefile.in
 
-PKG = $(shell ./setup.py --repo-names)
-PKG_BASE ?= $(shell readlink -f ..)
+#PIP_NAME = $(shell ./setup.py --name)
+#PIP_REQ = requirements.txt
 
-STATIC_DIRS = $(shell ./setup.py --static-dirs)
+#PKG = $(shell ./setup.py --repo-names)
+#PKG_BASE ?= $(shell readlink -f ..)
+
+#STATIC_DIRS = $(shell ./setup.py --static-dirs)
 
 PY_VERSION ?= python2.7
 PY_OPTS ?= -B 
@@ -57,7 +59,10 @@ ALL_DEPS += ; print " ".join(R("__PKG__") if "__PKG__" in D else [])
 ALL_DEPS_HACK = `cd $(ENV) ; bin/python -c '$(ALL_DEPS)'`
 
 alldeps:
-	@echo $(shell echo $(subst __PKG__,$(PIP_NAME),$(ALL_DEPS_HACK)))
+	@echo PKG = $(PKG)
+	@echo STATIC_DIRS = $(STATIC_DIRS)
+	@echo PIP_NAME = $(PIP_NAME)
+	echo $(subst __PKG__,$(PIP_NAME),$(ALL_DEPS_HACK))
 
 # requirements.txt
 
@@ -163,7 +168,7 @@ release-pkg-%:
 #
 
 clean:
-	rm -rf $(ENV) tests/$(COVERAGE_OUTPUT_DIR) tests/$(COVERAGE_FILE) *.egg-info MANIFEST.in $(PIP_REQ)
+	rm -rf $(ENV) tests/$(COVERAGE_OUTPUT_DIR) tests/$(COVERAGE_FILE) *.egg-info MANIFEST.in $(PIP_REQ) Makefile.in
 	@find . -name '*.pyc' -delete
 
 #
@@ -189,3 +194,13 @@ continuous: continuous-coverage
 
 profile:
 	cd tests ; ../$(ENV)/bin/python $(PY_OPTS) profile.py
+
+# caching of some things that don't change a lot
+
+Makefile.in: setup.py
+	@echo "PIP_NAME = $(shell ./setup.py --name)" > Makefile.in
+	@echo "PIP_REQ = requirements.txt" >> Makefile.in
+	@echo "PKG = $(shell ./setup.py --repo-names)" >> Makefile.in
+	@echo "PKG_BASE = $(shell readlink -f ..)" >> Makefile.in
+	@echo "STATIC_DIRS = $(shell ./setup.py --static-dirs)" >> Makefile.in
+

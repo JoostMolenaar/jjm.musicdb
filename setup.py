@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 
 repo_names = ['core']
-package_names = ['mysql-python', 'pygraphviz', 'lxml', 'pytz', 'sqlalchemy', 'psycopg2']
+package_names = ['pygraphviz', 'sqlalchemy', 'psycopg2']
 static_dirs = ['conf', 'web']
 
 import sys
