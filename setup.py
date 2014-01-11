@@ -17,8 +17,7 @@ setup(
         'musicdb',
         'musicdb.ctrl',
         'musicdb.model',
-        'musicdb.view'
-    ],
+        'musicdb.view' ],
     data_files=[ (root, map(lambda f: root + '/' + f, files))
                  for src_dir in static_dirs
                  for (root, dirs, files) in os.walk(src_dir) ],
@@ -26,8 +25,7 @@ setup(
     custom_metadata={
         'x_repo_names': repo_names,
         'x_dist_names': dist_names,
-        'x_static_dirs': static_dirs
-    })
+        'x_static_dirs': static_dirs })
 
 
 
