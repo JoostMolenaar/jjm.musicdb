@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 
 repo_names = ['core']
-dist_names = ['pygraphviz', 'sqlalchemy', 'psycopg2']
+dist_names = ['pygraphviz']
 static_dirs = ['conf', 'web']
 
 import os
