@@ -1,7 +1,8 @@
 NAME = musicdb
+
 LIB = core
-PKG = webob lxml mysql-python pygraphviz
+PKG = webob lxml mysql-python pygraphviz pytz
 
 MAIN = musicdb.main
 
-include Makefile.inc
+include lib/core/Makefile.inc
