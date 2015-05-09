@@ -2,17 +2,24 @@
 
 repo_names = ['core']
 dist_names = ['pygraphviz']
-static_dirs = ['conf', 'web']
+static_dirs = ['web']
 
 import os
 from setuptools import setup
 
+try:
+    with open('musicdb.egg-info/version.txt', 'r') as f:
+        version = f.read()
+except:
+    version = None
+
 setup(
+    name='musicdb',
+    version=version,
+    version_command=('git describe', 'pep440-git'),
+    url='https://github.com/j0057/musicdb',
     author='Joost Molenaar',
     author_email='j.j.molenaar@gmail.com',
-    url='https://github.com/j0057/musicdb',
-    version='0.1.0',
-    name='musicdb',
     packages=[
         'musicdb',
         'musicdb.ctrl',
@@ -26,6 +33,3 @@ setup(
         'x_repo_names': repo_names,
         'x_dist_names': dist_names,
         'x_static_dirs': static_dirs })
-
-
-
